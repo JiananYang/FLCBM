@@ -55,12 +55,12 @@ def load_or_compute_projections(args, backbone, posthoc_layer, train_loader, tes
     conceptbank_source = args.concept_bank.split("/")[-1].split(".")[0] 
     
     # To make it easier to analyize results/rerun with different params, we'll extract the embeddings and save them
-    train_file = f"train-embs_{args.dataset}__{args.backbone_name}__{conceptbank_source}.npy"
-    test_file = f"test-embs_{args.dataset}__{args.backbone_name}__{conceptbank_source}.npy"
-    train_proj_file = f"train-proj_{args.dataset}__{args.backbone_name}__{conceptbank_source}.npy"
-    test_proj_file = f"test-proj_{args.dataset}__{args.backbone_name}__{conceptbank_source}.npy"
-    train_lbls_file = f"train-lbls_{args.dataset}__{args.backbone_name}__{conceptbank_source}_lbls.npy"
-    test_lbls_file = f"test-lbls_{args.dataset}__{args.backbone_name}__{conceptbank_source}_lbls.npy"
+    train_file = f"train-embs_{args.dataset}__{args.backbone_name}.npy"
+    test_file = f"test-embs_{args.dataset}__{args.backbone_name}.npy"
+    train_proj_file = f"train-proj_{args.dataset}__{args.backbone_name}.npy"
+    test_proj_file = f"test-proj_{args.dataset}__{args.backbone_name}.npy"
+    train_lbls_file = f"train-lbls_{args.dataset}__{args.backbone_name}_lbls.npy"
+    test_lbls_file = f"test-lbls_{args.dataset}__{args.backbone_name}_lbls.npy"
     
 
     train_file = os.path.join(args.out_dir, train_file)

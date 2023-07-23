@@ -42,64 +42,64 @@ def cub_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed):
     return concept_loaders  
     
     
-def derm7pt_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed):
-    from .derma_data import Derm7ptDataset
-    from .constants import DERM7_META, DERM7_TRAIN_IDX, DERM7_VAL_IDX, DERM7_FOLDER
-    df = pd.read_csv(DERM7_META)
-    train_indexes = list(pd.read_csv(DERM7_TRAIN_IDX)['indexes'])
-    val_indexes = list(pd.read_csv(DERM7_VAL_IDX)['indexes'])
-    print(df.columns)
-    df["TypicalPigmentNetwork"] = df.apply(lambda row: {"absent": 0, "typical": 1, "atypical": -1}[row["pigment_network"]] ,axis=1)
-    df["AtypicalPigmentNetwork"] = df.apply(lambda row: {"absent": 0, "typical": -1, "atypical": 1}[row["pigment_network"]] ,axis=1)
+# def derm7pt_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed):
+#     from .derma_data import Derm7ptDataset
+#     from .constants import DERM7_META, DERM7_TRAIN_IDX, DERM7_VAL_IDX, DERM7_FOLDER
+#     df = pd.read_csv(DERM7_META)
+#     train_indexes = list(pd.read_csv(DERM7_TRAIN_IDX)['indexes'])
+#     val_indexes = list(pd.read_csv(DERM7_VAL_IDX)['indexes'])
+#     print(df.columns)
+#     df["TypicalPigmentNetwork"] = df.apply(lambda row: {"absent": 0, "typical": 1, "atypical": -1}[row["pigment_network"]] ,axis=1)
+#     df["AtypicalPigmentNetwork"] = df.apply(lambda row: {"absent": 0, "typical": -1, "atypical": 1}[row["pigment_network"]] ,axis=1)
 
-    df["RegularStreaks"] = df.apply(lambda row: {"absent": 0, "regular": 1, "irregular": -1}[row["streaks"]] ,axis=1)
-    df["IrregularStreaks"] = df.apply(lambda row: {"absent": 0, "regular": -1, "irregular": 1}[row["streaks"]] ,axis=1)
+#     df["RegularStreaks"] = df.apply(lambda row: {"absent": 0, "regular": 1, "irregular": -1}[row["streaks"]] ,axis=1)
+#     df["IrregularStreaks"] = df.apply(lambda row: {"absent": 0, "regular": -1, "irregular": 1}[row["streaks"]] ,axis=1)
 
-    df["RegressionStructures"] = df.apply(lambda row: (1-int(row["regression_structures"] == "absent")) ,axis=1)
+#     df["RegressionStructures"] = df.apply(lambda row: (1-int(row["regression_structures"] == "absent")) ,axis=1)
 
-    df["RegularDG"] = df.apply(lambda row: {"absent": 0, "regular": 1, "irregular": -1}[row["dots_and_globules"]] ,axis=1)
-    df["IrregularDG"] = df.apply(lambda row: {"absent": 0, "regular": -1, "irregular": 1}[row["dots_and_globules"]] ,axis=1)
+#     df["RegularDG"] = df.apply(lambda row: {"absent": 0, "regular": 1, "irregular": -1}[row["dots_and_globules"]] ,axis=1)
+#     df["IrregularDG"] = df.apply(lambda row: {"absent": 0, "regular": -1, "irregular": 1}[row["dots_and_globules"]] ,axis=1)
 
-    df["BWV"] = df.apply(lambda row: {"absent": 0, "present": 1}[row["blue_whitish_veil"]] ,axis=1)
+#     df["BWV"] = df.apply(lambda row: {"absent": 0, "present": 1}[row["blue_whitish_veil"]] ,axis=1)
 
-    df = df.iloc[train_indexes+val_indexes]
+#     df = df.iloc[train_indexes+val_indexes]
 
-    concepts = ["BWV", "RegularDG", "IrregularDG", "RegressionStructures", "IrregularStreaks",
-                   "RegularStreaks", "AtypicalPigmentNetwork", "TypicalPigmentNetwork"]
-    concept_loaders = {}
+#     concepts = ["BWV", "RegularDG", "IrregularDG", "RegressionStructures", "IrregularStreaks",
+#                    "RegularStreaks", "AtypicalPigmentNetwork", "TypicalPigmentNetwork"]
+#     concept_loaders = {}
     
-    for c_name in concepts: 
-        pos_df = df[df[c_name] == 1]
-        neg_df = df[df[c_name] == 0]
-        base_dir = os.path.join(DERM7_FOLDER, "images")
-        image_key = "derm"
+#     for c_name in concepts: 
+#         pos_df = df[df[c_name] == 1]
+#         neg_df = df[df[c_name] == 0]
+#         base_dir = os.path.join(DERM7_FOLDER, "images")
+#         image_key = "derm"
 
-        print(pos_df.shape, neg_df.shape)
+#         print(pos_df.shape, neg_df.shape)
         
-        if (pos_df.shape[0] < 2*n_samples) or (neg_df.shape[0] < 2*n_samples):
-            print("\t Not enough samples! Sampling with replacement")
-            pos_df = pos_df.sample(2*n_samples, replace=True)
-            neg_df = neg_df.sample(2*n_samples, replace=True)
-        else:
-            pos_df = pos_df.sample(2*n_samples)
-            neg_df = neg_df.sample(2*n_samples)
+#         if (pos_df.shape[0] < 2*n_samples) or (neg_df.shape[0] < 2*n_samples):
+#             print("\t Not enough samples! Sampling with replacement")
+#             pos_df = pos_df.sample(2*n_samples, replace=True)
+#             neg_df = neg_df.sample(2*n_samples, replace=True)
+#         else:
+#             pos_df = pos_df.sample(2*n_samples)
+#             neg_df = neg_df.sample(2*n_samples)
         
-        pos_ds = Derm7ptDataset(pos_df, base_dir=base_dir, image_key=image_key, transform=preprocess)
-        neg_ds = Derm7ptDataset(neg_df, base_dir=base_dir, image_key=image_key, transform=preprocess)
-        pos_loader = DataLoader(pos_ds,
-                                batch_size=batch_size,
-                                shuffle=False,
-                                num_workers=num_workers)
+#         pos_ds = Derm7ptDataset(pos_df, base_dir=base_dir, image_key=image_key, transform=preprocess)
+#         neg_ds = Derm7ptDataset(neg_df, base_dir=base_dir, image_key=image_key, transform=preprocess)
+#         pos_loader = DataLoader(pos_ds,
+#                                 batch_size=batch_size,
+#                                 shuffle=False,
+#                                 num_workers=num_workers)
 
-        neg_loader = DataLoader(neg_ds,
-                                batch_size=batch_size,
-                                shuffle=False,
-                                num_workers=num_workers)
-        concept_loaders[c_name] = {
-            "pos": pos_loader,
-            "neg": neg_loader
-        }
-    return concept_loaders
+#         neg_loader = DataLoader(neg_ds,
+#                                 batch_size=batch_size,
+#                                 shuffle=False,
+#                                 num_workers=num_workers)
+#         concept_loaders[c_name] = {
+#             "pos": pos_loader,
+#             "neg": neg_loader
+#         }
+#     return concept_loaders
     
 class ListDataset:
     def __init__(self, images, transform=None):
@@ -161,11 +161,11 @@ def get_concept_loaders(dataset_name, preprocess, n_samples=50, batch_size=100, 
     if dataset_name == "cub":
        return cub_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed)
     
-    elif dataset_name == "derm7pt":
-        return derm7pt_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed)
+    # elif dataset_name == "derm7pt":
+    #     return derm7pt_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed)
     
-    elif dataset_name == "broden":
-        return broden_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed)
-    else:
-        raise ValueError(f"Dataset {dataset_name} not supported")
+    # elif dataset_name == "broden":
+    #     return broden_concept_loaders(preprocess, n_samples, batch_size, num_workers, seed)
+    # else:
+    #     raise ValueError(f"Dataset {dataset_name} not supported")
     
